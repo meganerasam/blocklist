@@ -17,7 +17,7 @@ jobs:
         run: |
           # Replace with your published CSV URL from Google Sheets
           GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSkX9AJGUrc2svr9zPPGKXM-01TTBWyLDv4MvasLFhLynFWoW2k-TACOrRedm86Td9gCq87W-8jawmQ/pub?gid=1932785084&single=true&output=csv"
-          curl -sS "$GOOGLE_SHEET_URL" -o blocklist.csv
+          curl -L -sS "$GOOGLE_SHEET_URL" -o blocklist.csv
 
       - name: Configure Git
         run: |
