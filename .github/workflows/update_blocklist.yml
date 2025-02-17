@@ -1,4 +1,4 @@
-name: Update Block Domain List
+name: Update Blocklist
 
 on:
   schedule:
@@ -13,11 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Fetch latest domain list from Google Sheets
+      - name: Fetch latest blocklist from Google Sheets
         run: |
           # Replace with your published CSV URL from Google Sheets
           GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSkX9AJGUrc2svr9zPPGKXM-01TTBWyLDv4MvasLFhLynFWoW2k-TACOrRedm86Td9gCq87W-8jawmQ/pub?gid=1932785084&single=true&output=csv"
-          curl -sS "$GOOGLE_SHEET_URL" -o domain_list.csv
+          curl -sS "$GOOGLE_SHEET_URL" -o blocklist.csv
 
       - name: Configure Git
         run: |
@@ -26,9 +26,9 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          git add -f blocklist.csv
           if [ -n "$(git status --porcelain)" ]; then
-            git add blocklist.csv
-            git commit -m "Update domain list from Google Sheets - $(date '+%Y%m%d %H:%M')"
+            git commit -m "Update blocklist.csv from Google Sheets $(date '+%Y-%m-%d %H:%M')"
             git push
           else
             echo "No changes detected."
