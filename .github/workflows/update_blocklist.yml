@@ -16,7 +16,7 @@ jobs:
       - name: Fetch latest blocklist from Google Sheets
         run: |
           # Replace with your published CSV URL from Google Sheets
-          GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vS4JybH2kBvDbIrFRmTFlYNshG2DnceKngg6tPcKmgmdZc-Nw8iN9wPCo8CLwUe_0U_3adhFaflsrU1/pub?gid=1932785084&single=true&output=csv"
+          GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/18Q86cyLgrDXrPCI3NrFlJTiLwU4JQ3QCFYRVR1_WDpc/export?format=csv&gid=1932785084#gid=1932785084"
           curl -L -sS "$GOOGLE_SHEET_URL" -o blocklist.csv
 
       - name: Configure Git
