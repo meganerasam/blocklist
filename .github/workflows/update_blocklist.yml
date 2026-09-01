@@ -1,31 +1,34 @@
 name: Update Blocklist
-
 on:
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
-
 jobs:
   update-sheet:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Fetch latest blocklist from Google Sheets
+        id: fetch
+        continue-on-error: true
         run: |
-          # Replace with your published CSV URL from Google Sheets
-          GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/18Q86cyLgrDXrPCI3NrFlJTiLwU4JQ3QCFYRVR1_WDpc/export?format=csv&gid=1932785084#gid=1932785084"
-          curl -L -sS "$GOOGLE_SHEET_URL" -o blocklist.csv
+          GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/18Q86cyLgrDXrPCI3NrFlJTiLwU4JQ3QCFYRVR1_WDpc/export?format=csv&gid=1932785084"
+          curl -L -sS --fail --max-time 60 --retry 3 --retry-delay 30 \
+            "$GOOGLE_SHEET_URL" -o blocklist.new.csv
+          test -s blocklist.new.csv
+          ! head -c 200 blocklist.new.csv | grep -qi "<html\|<!DOCTYPE"
 
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit and push changes
+      - name: Commit update (fetch OK)
+        if: steps.fetch.outcome == 'success'
         run: |
+          mv blocklist.new.csv blocklist.csv
           git add -f blocklist.csv
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Update blocklist.csv from Google Sheets $(date '+%Y-%m-%d %H:%M')"
@@ -33,3 +36,11 @@ jobs:
           else
             echo "No changes detected."
           fi
+
+      - name: Trace failure (fetch KO)
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          rm -f blocklist.new.csv
+          git commit --allow-empty -m "SKIP: Google Sheets injoignable $(date '+%Y-%m-%d %H:%M') - blocklist.csv inchangé"
+          git push
+          exit 1
